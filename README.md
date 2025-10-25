@@ -19,7 +19,7 @@
 ## 📸 Preview
 
 <div align="center">
-  <img src="https://via.placeholder.com/800x400/1a1a1a/ffffff?text=ShopEase+Preview" alt="ShopEase Preview" width="800"/>
+  <img src="https://github.com/Keshavkumarr0/ShopEase-/blob/main/Screenshot%20(462).png"/>
 </div>
 
 ---
