@@ -15,20 +15,43 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
 
   useEffect(() => {
-    if (products.length > 0) {
+    if (products.length > 0 && id) {
+      // Try multiple matching strategies
       const found = products.find((p) => {
-        const productId = typeof p.id === 'string' && p.id.includes('gid://shopify/Product/')
-          ? p.id.split('/').pop()
-          : p.id.toString();
-        return productId === id;
+        // Strategy 1: Direct match
+        if (p.id === id) return true;
+        
+        // Strategy 2: Extract numeric ID from Shopify GID
+        if (typeof p.id === 'string' && p.id.includes('gid://shopify/Product/')) {
+          const numericId = p.id.split('/').pop();
+          if (numericId === id) return true;
+        }
+        
+        // Strategy 3: Convert both to string and compare
+        const productIdStr = p.id.toString();
+        if (productIdStr === id || productIdStr.endsWith(id)) return true;
+        
+        // Strategy 4: Handle encoded IDs
+        const decodedId = decodeURIComponent(id);
+        if (p.id === decodedId || productIdStr === decodedId) return true;
+        
+        return false;
       });
-      setProduct(found);
+
+      if (found) {
+        console.log('✅ Product found:', found);
+        setProduct(found);
+      } else {
+        console.log('❌ Product not found. ID:', id);
+        console.log('Available products:', products.map(p => ({ id: p.id, title: p.title })));
+        setProduct(null);
+      }
     }
   }, [id, products]);
 
   if (loading) {
     return (
-      <div className="loading">
+      <div className="loading-spinner">
         <div className="spinner"></div>
         <p>Loading product...</p>
       </div>
@@ -37,19 +60,53 @@ const ProductDetail = () => {
 
   if (!product) {
     return (
-      <div className="error">
-        <h2>Product not found</h2>
-        <p>The product you're looking for doesn't exist.</p>
-        <button className="back-btn" onClick={() => navigate('/')}>
-          <FaArrowLeft size={20} /> Go to Home
-        </button>
+      <div className="product-detail-page">
+        <div className="error" style={{ 
+          textAlign: 'center', 
+          padding: '4rem 2rem',
+          minHeight: '60vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Product not found</h2>
+          <p style={{ color: 'var(--color-text-secondary)', marginBottom: '2rem' }}>
+            The product you're looking for doesn't exist.
+          </p>
+          <button 
+            className="back-btn" 
+            onClick={() => navigate('/')}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <FaArrowLeft size={20} /> Go to Home
+          </button>
+        </div>
       </div>
     );
   }
 
-  const price = product.price || "N/A";
+  const price = product.price || "0.00";
   const image = product.image || PLACEHOLDER_IMAGE;
   const imageAlt = product.imageAlt || product.title || "Product image";
+  const description = product.description || "No description available.";
+
+  const handleAddToCart = () => {
+    try {
+      addToCart({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.image,
+        variantId: product.variantId,
+        quantity: 1
+      });
+      alert(`✅ ${product.title} added to cart!`);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert('❌ Failed to add to cart');
+    }
+  };
 
   return (
     <div className="product-detail-page">
@@ -59,14 +116,33 @@ const ProductDetail = () => {
 
       <div className="product-detail">
         <div className="product-detail-image">
-          <img src={image} alt={imageAlt} onError={(e) => e.target.src = PLACEHOLDER_IMAGE} />
+          <img 
+            src={image} 
+            alt={imageAlt} 
+            onError={(e) => {
+              console.log('Image load failed, using placeholder');
+              e.target.src = PLACEHOLDER_IMAGE;
+            }} 
+          />
         </div>
+
         <div className="product-detail-info">
           <h1>{product.title}</h1>
-          <p className="price">${price}</p>
-          <p className="description">{product.description || "No description available."}</p>
-          <button className="add-btn" onClick={() => addToCart(product, 1)}>
-            <FaShoppingCart size={22} /> Add to Cart
+          
+          <p className="price">
+            ${parseFloat(price).toFixed(2)}
+            {product.currency && ` ${product.currency}`}
+          </p>
+          
+          <p className="description">{description}</p>
+          
+          <button 
+            className="add-btn" 
+            onClick={handleAddToCart}
+            disabled={!product.availableForSale}
+          >
+            <FaShoppingCart size={22} />
+            {product.availableForSale !== false ? 'Add to Cart' : 'Out of Stock'}
           </button>
         </div>
       </div>
@@ -75,3 +151,4 @@ const ProductDetail = () => {
 };
 
 export default ProductDetail;
+
