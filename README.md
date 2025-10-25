@@ -132,4 +132,6 @@
 ### Installation
 
 1. **Clone the repository**
+   git clone https://github.com/Keshavkumarr0/ShopEase-.git
+cd ShopEase-
 
