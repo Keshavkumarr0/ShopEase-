@@ -159,3 +159,18 @@ npm run build
 npm run preview
 
 
+### Test Features:
+- ✅ Browse 70+ products with pagination
+- ✅ Add products to cart and manage quantities
+- ✅ Chat with AI assistant for product recommendations
+- ✅ Toggle between dark and light themes
+- ✅ Search for products
+- ✅ Fully responsive on mobile devices
+
+<div align="center">
+
+
+Made with ❤️ by Keshav Kumar
+
+</div>   
+
