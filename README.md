@@ -135,3 +135,27 @@
    git clone https://github.com/Keshavkumarr0/ShopEase-.git
 cd ShopEase-
 
+2. **Install dependencies**
+
+npm install
+
+3. **Set up environment variables**
+
+Create a `.env` file in the root directory:
+ VITE_SHOPIFY_DOMAIN=your-store.myshopify.com
+VITE_SHOPIFY_STOREFRONT_ACCESS_TOKEN=your_storefront_token
+VITE_GOOGLE_GEMINI_API_KEY=your_gemini_api_key
+
+
+4. **Start development server**
+  npm run dev
+
+5. **Open browser**
+
+Navigate to `http://localhost:5173`
+
+### Build for Production
+npm run build
+npm run preview
+
+
