@@ -6,6 +6,9 @@ import { useCart } from "../context/CartContext";
 const PLACEHOLDER_IMAGE =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect fill='%23e8e8e8' width='400' height='400'/%3E%3Ctext fill='%23666' x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-size='18' font-family='Arial'%3EImage Unavailable%3C/text%3E%3C/svg%3E";
 
+const IMAGE_WIDTH = 400;
+const IMAGE_HEIGHT = 400;
+
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
@@ -42,14 +45,15 @@ const ProductCard = ({ product }) => {
   return (
     <div className="product-card" onClick={handleCardClick}>
       <div className="product-card-image">
-        <img src={image} alt={imageAlt} loading="lazy" onError={handleImageError} />
-        {/* ❌ REMOVED: Quick View Overlay */}
-        {/* 
-        <div className="product-card-overlay">
-          <FaEye size={20} />
-          <span>Quick View</span>
-        </div>
-        */}
+        <img
+          src={image}
+          alt={imageAlt}
+          loading="lazy"
+          width={IMAGE_WIDTH}
+          height={IMAGE_HEIGHT}
+          onError={handleImageError}
+          style={{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT, objectFit: "cover" }}
+        />
       </div>
 
       <div className="product-card-content">
