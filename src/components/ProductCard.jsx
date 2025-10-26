@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { FaShoppingCart } from "react-icons/fa";
-import { useState } from "react";
+import { useState, memo } from "react";
 import { useCart } from "../context/CartContext";
 
 const PLACEHOLDER_IMAGE =
@@ -9,19 +9,21 @@ const PLACEHOLDER_IMAGE =
 const IMAGE_WIDTH = 400;
 const IMAGE_HEIGHT = 400;
 
-const ProductCard = ({ product }) => {
+const ProductCard = memo(({ product }) => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const [imageError, setImageError] = useState(false);
 
+  // ✅ More robust product ID extraction
   const getProductId = () => {
-    if (typeof product.id === "string" && product.id.includes("gid://shopify/Product/")) {
+    if (typeof product?.id === "string" && product.id.includes("gid://shopify/Product/")) {
       return product.id.split("/").pop();
     }
-    return product.id;
+    return product?.id;
   };
 
   const handleCardClick = (e) => {
+    // Prevent navigation if Add to Cart clicked
     if (e.target.closest(".product-card-btn")) return;
     navigate(`/product/${getProductId()}`);
   };
@@ -38,34 +40,53 @@ const ProductCard = ({ product }) => {
     }
   };
 
-  const image = product.image || PLACEHOLDER_IMAGE;
-  const price = product.price || "N/A";
-  const imageAlt = product.imageAlt || product.title || "Product image";
+  const imageSrc = imageError ? PLACEHOLDER_IMAGE : product?.image || PLACEHOLDER_IMAGE;
+  const price = product?.price || "N/A";
+  const imageAlt = product?.imageAlt || product?.title || "Product image";
 
   return (
-    <div className="product-card" onClick={handleCardClick}>
+    <article
+      className="product-card"
+      onClick={handleCardClick}
+      tabIndex={0} // ✅ accessibility: make it focusable
+      onKeyDown={(e) => e.key === "Enter" && handleCardClick(e)} // keyboard navigation
+    >
       <div className="product-card-image">
         <img
-          src={image}
+          src={imageSrc}
           alt={imageAlt}
           loading="lazy"
+          decoding="async"
           width={IMAGE_WIDTH}
           height={IMAGE_HEIGHT}
           onError={handleImageError}
-          style={{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT, objectFit: "cover" }}
+          style={{
+            width: IMAGE_WIDTH,
+            height: IMAGE_HEIGHT,
+            objectFit: "cover",
+            borderRadius: "8px",
+            transition: "transform 0.3s ease",
+          }}
         />
       </div>
 
       <div className="product-card-content">
-        <h3 className="product-card-title">{product.title}</h3>
+        <h3 className="product-card-title" title={product?.title}>
+          {product?.title || "Untitled Product"}
+        </h3>
         <p className="product-card-price">${price}</p>
-        <button className="product-card-btn" onClick={handleAddToCart}>
+
+        <button
+          className="product-card-btn"
+          onClick={handleAddToCart}
+          aria-label={`Add ${product?.title || "product"} to cart`}
+        >
           <FaShoppingCart size={18} />
           <span>Add to Cart</span>
         </button>
       </div>
-    </div>
+    </article>
   );
-};
+});
 
 export default ProductCard;
